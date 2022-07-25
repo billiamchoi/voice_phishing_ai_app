@@ -1,6 +1,0 @@
-module Pods_Voicephishing {
-  umbrella header "Pods-Voicephishing-umbrella.h"
-
-  export *
-  module * { export * }
-}
