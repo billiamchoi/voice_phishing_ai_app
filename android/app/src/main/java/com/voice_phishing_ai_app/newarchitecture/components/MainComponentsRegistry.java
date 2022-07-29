@@ -1,4 +1,4 @@
-package com.voicephishing.newarchitecture.components;
+package com.voice_phishing_ai_app.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;

@@ -1,4 +1,9 @@
+# OSX
+#
+.DS_Store
+
 # Xcode
+#
 build/
 *.pbxuser
 !default.pbxuser
@@ -15,60 +20,44 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
-project.xcworkspace
+ios/.xcode.env.local
 
-# Gradle
-/build/
-/RNTester/android/app/build/
-/RNTester/android/app/gradle/
-/RNTester/android/app/gradlew
-/RNTester/android/app/gradlew.bat
-/ReactAndroid/build/
-
-# BUCK
-.buckd
-buck-out
-/ReactAndroid/src/main/jni/prebuilt/lib/armeabi-v7a/
-/ReactAndroid/src/main/jni/prebuilt/lib/x86/
-/ReactAndroid/src/main/gen
-
-# Android/IJ
+# Android/IntelliJ
+#
+build/
 .idea
 .gradle
 local.properties
 *.iml
+*.hprof
 
 # node.js
-node_modules/*
-!node_modules/**/react-native-step-indicator/
-*.log
-.nvm
-/bots/node_modules/
-package-lock.json
+#
+node_modules/
+npm-debug.log
+yarn-error.log
 
-# OS X
-.DS_Store
+# BUCK
+buck-out/
+\.buckd/
+*.keystore
+!debug.keystore
 
-# Thumbnails
-._*
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
+# screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/
 
-# Test generated files
-/ReactAndroid/src/androidTest/assets/AndroidTestBundle.js
-*.js.meta
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
 
-/coverage
-/third-party
+# Bundle artifact
+*.jsbundle
 
-# Root dir shouldn't have Xcode project
-/*.xcodeproj
-
-# ReactCommon subdir shouldn't have Xcode project
-/ReactCommon/**/*.xcodeproj
-RNTester/build
-
-# CocoaPods
+# Ruby / CocoaPods
 /ios/Pods/
-/ios/Podfile.lock
-
-# Ignoring Environment File
-.env
+/vendor/bundle/

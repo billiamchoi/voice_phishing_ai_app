@@ -1,4 +1,4 @@
-package com.voicephishing.newarchitecture;
+package com.voice_phishing_ai_app.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.voicephishing.BuildConfig;
-import com.voicephishing.newarchitecture.components.MainComponentsRegistry;
-import com.voicephishing.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.voice_phishing_ai_app.BuildConfig;
+import com.voice_phishing_ai_app.newarchitecture.components.MainComponentsRegistry;
+import com.voice_phishing_ai_app.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

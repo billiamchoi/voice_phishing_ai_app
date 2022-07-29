@@ -14,12 +14,12 @@ Environments
 
 | Node.js | npm |nvm|
 | ------ | ------ |-----|
-| v12.16.1 | v6.13.4 |v0.33.1|
+| v16.16.0 | v8.11.0 |v0.33.1|
 
 | react native | 
 | ------ | 
-| v8.0.3
-dd
+| v0.69.3
+
 ---
 
 
@@ -52,5 +52,4 @@ Let Metro Bundler run in its own terminal. Open a new terminal inside your React
 ```shell
 $ npx react-native run-android
 ```
-
 

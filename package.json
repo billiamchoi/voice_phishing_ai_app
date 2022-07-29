@@ -1,5 +1,5 @@
 {
-  "name": "Voicephishing",
+  "name": "voice_phishing_ai_app",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "react": "18.0.0",
-    "react-native": "0.69.2"
+    "react-native": "0.69.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

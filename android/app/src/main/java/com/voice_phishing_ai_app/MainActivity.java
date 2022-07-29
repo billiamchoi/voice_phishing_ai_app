@@ -1,4 +1,4 @@
-package com.voicephishing;
+package com.voice_phishing_ai_app;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
@@ -12,7 +12,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "Voicephishing";
+    return "voice_phishing_ai_app";
   }
 
   /**

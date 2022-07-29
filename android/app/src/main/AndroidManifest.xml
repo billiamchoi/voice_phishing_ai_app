@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.voicephishing">
+  package="com.voice_phishing_ai_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
 

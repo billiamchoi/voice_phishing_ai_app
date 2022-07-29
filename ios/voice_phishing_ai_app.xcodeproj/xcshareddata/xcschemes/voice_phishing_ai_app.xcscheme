@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "Voicephishing.app"
-               BlueprintName = "Voicephishing"
-               ReferencedContainer = "container:Voicephishing.xcodeproj">
+               BuildableName = "voice_phishing_ai_app.app"
+               BlueprintName = "voice_phishing_ai_app"
+               ReferencedContainer = "container:voice_phishing_ai_app.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "VoicephishingTests.xctest"
-               BlueprintName = "VoicephishingTests"
-               ReferencedContainer = "container:Voicephishing.xcodeproj">
+               BuildableName = "voice_phishing_ai_appTests.xctest"
+               BlueprintName = "voice_phishing_ai_appTests"
+               ReferencedContainer = "container:voice_phishing_ai_app.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Voicephishing.app"
-            BlueprintName = "Voicephishing"
-            ReferencedContainer = "container:Voicephishing.xcodeproj">
+            BuildableName = "voice_phishing_ai_app.app"
+            BlueprintName = "voice_phishing_ai_app"
+            ReferencedContainer = "container:voice_phishing_ai_app.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Voicephishing.app"
-            BlueprintName = "Voicephishing"
-            ReferencedContainer = "container:Voicephishing.xcodeproj">
+            BuildableName = "voice_phishing_ai_app.app"
+            BlueprintName = "voice_phishing_ai_app"
+            ReferencedContainer = "container:voice_phishing_ai_app.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
