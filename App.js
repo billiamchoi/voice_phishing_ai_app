@@ -90,7 +90,7 @@ class App extends Component {
     })
 
     try {
-      await Voice.start("en-US")
+      await Voice.start("ko-KR")
     } catch (e) {
       console.error(e)
     }
