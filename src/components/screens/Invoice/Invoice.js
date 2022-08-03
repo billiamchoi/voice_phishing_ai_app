@@ -1,9 +1,9 @@
 import React, { Component } from "react"
 import { StyleSheet, Text, View, Image, TouchableHighlight } from "react-native"
-
 import Voice from "@react-native-voice/voice"
 
-class App extends Component {
+
+class Invoice extends Component {
   state = {
     recognized: "",
     pitch: "",
@@ -160,7 +160,7 @@ class App extends Component {
         })}
         <Text style={styles.stat}>{`End: ${this.state.end}`}</Text>
         <TouchableHighlight onPress={this._startRecognizing}>
-          <Image style={styles.button} source={require("./button.png")} />
+          <Image style={styles.button} source={require("../../images/micButton.png")} />
         </TouchableHighlight>
         <TouchableHighlight onPress={this._stopRecognizing}>
           <Text style={styles.action}>Stop Recognizing</Text>
@@ -210,4 +210,5 @@ const styles = StyleSheet.create({
   }
 })
 
-export default App
+export default Invoice
+
