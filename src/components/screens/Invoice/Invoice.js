@@ -177,15 +177,15 @@ class Invoice extends Component {
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: 50,
-    height: 50
-  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F5FCFF"
+  },
+  button: {
+    width: 50,
+    height: 50
   },
   welcome: {
     fontSize: 20,
