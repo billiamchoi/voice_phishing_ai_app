@@ -5,8 +5,9 @@ import Permissions from 'react-native-permissions';
 import Sound from 'react-native-sound';
 import AudioRecord from 'react-native-audio-record';
 import axios from "axios"
-const baseUrl = "http://10.0.2.2:5000"
-import * as RNFS from 'react-native-fs'
+
+// const baseUrl = "http://10.0.2.2:5000"
+const baseUrl = "http://127.0.0.1:5000"
 
 class Mypage extends Component {
   sound = null;
@@ -86,7 +87,6 @@ class Mypage extends Component {
     .catch(function (error) {
       console.log(error);
     });
-  
   };
 
   load = () => {
