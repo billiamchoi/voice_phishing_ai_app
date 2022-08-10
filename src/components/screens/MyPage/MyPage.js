@@ -58,20 +58,35 @@ class Mypage extends Component {
     if (!this.state.recording) return;
     console.log('stop record');
     let audioFile = await AudioRecord.stop();
+    let audio = {
+      uri: `file://${audioFile}`,
+      type: 'audio/wav',
+      // uuid를 사용하여 이름을 유일하게 바꿀 필요가 있음 (중요도 하) 
+      name: 'test'
+    }
+
+    let body = new FormData();
+
+    body.append('file_name', audio.name)
+    body.append('file', audio)
+
     console.log('audioFile', audioFile);
     this.setState({ audioFile, recording: false });
-    RNFS.readFile(audioFile, 'base64')
-        .then((data) => {
-          axios.post(`${baseUrl}/api/stt_voice`, {
-            voice: data
-          })
-          .then(function (response) {
-            console.log(response);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-        })
+
+    axios.post(`${baseUrl}/api/stt_voice/create`, body,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+    )
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  
   };
 
   load = () => {
