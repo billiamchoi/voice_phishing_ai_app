@@ -1,9 +1,12 @@
 import React, { Component } from "react"
 import { StyleSheet, Text, View, Image, TouchableHighlight } from "react-native"
 import Voice from "@react-native-voice/voice"
+import axios from "axios"
 
+const baseUrl = "http://10.0.2.2:5000"
 
 class Invoice extends Component {
+  sound = null
   state = {
     recognized: "",
     pitch: "",
@@ -37,42 +40,51 @@ class Invoice extends Component {
   }
 
   onSpeechRecognized = e => {
-    console.log("onSpeechRecognized: ", e)
+    // console.log("onSpeechRecognized: ", e)
     this.setState({
       recognized: "√"
     })
   }
 
   onSpeechEnd = e => {
-    console.log("onSpeechEnd: ", e)
+    console.log("끝났다 이자식아")
     this.setState({
       end: "√"
     })
+    axios.post(`${baseUrl}/api/stt_text`, {
+      text: this.state.partialResults[0]
+    })
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
   }
 
   onSpeechError = e => {
-    console.log("onSpeechError: ", e)
+    // console.log("onSpeechError: ", e)
     this.setState({
       error: JSON.stringify(e.error)
     })
   }
 
   onSpeechResults = e => {
-    console.log("onSpeechResults: ", e)
+    // console.log("onSpeechResults: ", e)
     this.setState({
       results: e.value
     })
   }
 
   onSpeechPartialResults = e => {
-    console.log("onSpeechPartialResults: ", e)
+    // console.log("onSpeechPartialResults: ", e)
     this.setState({
       partialResults: e.value
     })
   }
 
   onSpeechVolumeChanged = e => {
-    console.log("onSpeechVolumeChanged: ", e)
+    // console.log("onSpeechVolumeChanged: ", e)
     this.setState({
       pitch: e.value
     })
@@ -132,10 +144,13 @@ class Invoice extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native Voice!</Text>
+        <Text style={styles.welcome}>보이스 피싱 검출 AI</Text>
         <Text style={styles.instructions}>
-          Press the button and start speaking.
+          아래 빨간 마이크를 누르고 말하세요.
         </Text>
+        <TouchableHighlight onPress={this._startRecognizing}>
+          <Image style={styles.button} source={require("../../images/micButton.png")} />
+        </TouchableHighlight>
         <Text style={styles.stat}>{`Started: ${this.state.started}`}</Text>
         <Text
           style={styles.stat}
@@ -159,9 +174,6 @@ class Invoice extends Component {
           )
         })}
         <Text style={styles.stat}>{`End: ${this.state.end}`}</Text>
-        <TouchableHighlight onPress={this._startRecognizing}>
-          <Image style={styles.button} source={require("../../images/micButton.png")} />
-        </TouchableHighlight>
         <TouchableHighlight onPress={this._stopRecognizing}>
           <Text style={styles.action}>Stop Recognizing</Text>
         </TouchableHighlight>
@@ -205,7 +217,7 @@ const styles = StyleSheet.create({
   },
   stat: {
     textAlign: "center",
-    color: "#B0171F",
+    color: "black",
     marginBottom: 1
   }
 })
