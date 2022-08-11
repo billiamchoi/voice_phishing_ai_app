@@ -93,7 +93,7 @@ class Invoice extends Component {
     console.log('audioFile', audioFile);
     this.setState({ audioFile, recording: false });
 
-    axios.post(`${baseUrl}/api/stt_voice/create`, body,
+    axios.post(`${baseUrl}/api/stt_voice`, body,
     {
       headers: {
         'Content-Type': 'multipart/form-data'
