@@ -1,12 +1,11 @@
-import React, { Component } from "react"
-import { StyleSheet, Text, View, Image, TouchableHighlight } from "react-native"
-import Voice from "@react-native-voice/voice"
-import { Buffer } from 'buffer'
+import React, { Component } from "react";
+import { StyleSheet, Text, View, Image, TouchableHighlight } from "react-native";
+import Voice from "@react-native-voice/voice";
 import Permissions from 'react-native-permissions';
 import Sound from 'react-native-sound';
 import AudioRecord from 'react-native-audio-record';
-import axios from "axios"
-
+import axios from "axios";
+import PushNotification from "react-native-push-notification"; 
 
 // const baseUrl = "http://10.0.2.2:5000"
 const baseUrl = "http://127.0.0.1:5000"
@@ -39,6 +38,7 @@ class Invoice extends Component {
 
   async componentDidMount() {
     await this.checkPermission();
+
 
     const options = {
       sampleRate: 16000,
@@ -81,7 +81,6 @@ class Invoice extends Component {
     let audio = {
       uri: `file://${audioFile}`,
       type: 'audio/wav',
-      // uuid를 사용하여 이름을 유일하게 바꿀 필요가 있음 (중요도 하) 
       name: 'test'
     }
 
@@ -177,7 +176,16 @@ class Invoice extends Component {
       text: this.state.partialResults[0]
     })
     .then(function (response) {
-      console.log(response);
+      console.log("predict_score is : ", response.data);
+      scoreNum = Number(response.data)
+      if(scoreNum>=0.5){
+        message = "보이스피싱이 맞습니다."
+      }else{
+        message = "보이스피싱이 아닙니다."
+      }
+      PushNotification.localNotification({
+        message
+      });
     })
     .catch(function (error) {
       console.log(error);
@@ -271,6 +279,19 @@ class Invoice extends Component {
     this.start();
   }
 
+ //  this.handleNodtification이 api/stt_text 호출할때 안됨 코드 리팩토링할때 고려해서 정리 필요
+  // handleNotification = (score) => {
+  //   scoreNum = Number(score)
+  //   if(scoreNum>=0.5){
+  //     message = "보이스피싱이 맞습니다."
+  //   }else{
+  //     message = "보이스피싱이 아닙니다."
+  //   }
+  //   PushNotification.localNotification({
+  //     message
+  //   });
+  // }
+
   render() {
     return (
       <View style={styles.container}>
@@ -312,6 +333,9 @@ class Invoice extends Component {
         </TouchableHighlight>
         <TouchableHighlight onPress={this._destroyRecognizer}>
           <Text style={styles.action}>Destroy</Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={()=> {this.handleNotification()}}>
+          <Text style={styles.action}>Test LocalNotification</Text>
         </TouchableHighlight>
       </View>
     )
