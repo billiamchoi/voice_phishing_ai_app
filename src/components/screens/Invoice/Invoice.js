@@ -6,6 +6,8 @@ import Sound from 'react-native-sound';
 import AudioRecord from 'react-native-audio-record';
 import axios from "axios";
 import PushNotification from "react-native-push-notification"; 
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 // const baseUrl = "http://10.0.2.2:5000"
 const baseUrl = "http://127.0.0.1:5000"
@@ -279,7 +281,7 @@ class Invoice extends Component {
     this.start();
   }
 
- //  this.handleNodtification이 api/stt_text 호출할때 안됨 코드 리팩토링할때 고려해서 정리 필요
+ //  this.handleNodtification이 api/stt_text 호출할때 안됨 코드 리팩토링할때 고려ㅅ
   // handleNotification = (score) => {
   //   scoreNum = Number(score)
   //   if(scoreNum>=0.5){
@@ -297,46 +299,21 @@ class Invoice extends Component {
       <View style={styles.container}>
         <Text style={styles.welcome}>보이스 피싱 검출 AI</Text>
         <Text style={styles.instructions}>
-          아래 빨간 마이크를 누르고 말하세요.
+          아래 마이크를 누르고 말하세요.
         </Text>
-        <TouchableHighlight onPress={this.startRecordRecognizing}>
-          <Image style={styles.button} source={require("../../images/micButton.png")} />
-        </TouchableHighlight>
-        <Text style={styles.stat}>{`Started: ${this.state.started}`}</Text>
-        <Text
-          style={styles.stat}
-        >{`Recognized: ${this.state.recognized}`}</Text>
-        <Text style={styles.stat}>{`Pitch: ${this.state.pitch}`}</Text>
-        <Text style={styles.stat}>{`Error: ${this.state.error}`}</Text>
-        <Text style={styles.stat}>Results</Text>
-        {this.state.results.map((result, index) => {
-          return (
-            <Text key={`result-${index}`} style={styles.stat}>
-              {result}
-            </Text>
-          )
-        })}
-        <Text style={styles.stat}>Partial Results</Text>
-        {this.state.partialResults.map((result, index) => {
-          return (
-            <Text key={`partial-result-${index}`} style={styles.stat}>
-              {result}
-            </Text>
-          )
-        })}
-        <Text style={styles.stat}>{`End: ${this.state.end}`}</Text>
-        <TouchableHighlight onPress={this._stopRecognizing}>
-          <Text style={styles.action}>Stop Recognizing</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this._cancelRecognizing}>
-          <Text style={styles.action}>Cancel</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this._destroyRecognizer}>
-          <Text style={styles.action}>Destroy</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={()=> {this.handleNotification()}}>
-          <Text style={styles.action}>Test LocalNotification</Text>
-        </TouchableHighlight>
+        <View style={styles.buttonList} >
+          <Ionicons onPress={this.startRecordRecognizing} name={"mic-circle-outline"} size={70} color={"dodgerblue"} /> 
+          <Ionicons onPress={this._stopRecognizing} name={"stop-circle-outline"} size={70} color={"dodgerblue"} /> 
+        </View>
+        <View style={styles.resultBox}>
+          {this.state.partialResults.map((result, index) => {
+            return (
+              <Text style={styles.resultText} key={`partial-result-${index}`}>
+                {result}
+              </Text>
+            )
+          })}
+        </View>
       </View>
     )
   }
@@ -352,6 +329,11 @@ const styles = StyleSheet.create({
   button: {
     width: 50,
     height: 50
+  },
+  buttonList: {
+    flexDirection: "row",
+    marginBottom: 50
+
   },
   welcome: {
     fontSize: 20,
@@ -373,6 +355,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "black",
     marginBottom: 1
+  },
+  resultBox: {
+    marginTop: 10,
+    width: 330,
+    height: 400,
+    backgroundColor: "white",
+    borderWidth: 2,
+    padding: 10,
+    borderColor: "dodgerblue"
+  },
+  resultText: {
+    fontSize: 18
   }
 })
 
