@@ -1,6 +1,6 @@
 import React from "react"
 import { NavigationContainer } from "@react-navigation/native"
-import { Appstack } from "./components/navigations"
+import { Appstack } from "./navigation"
 
 
 

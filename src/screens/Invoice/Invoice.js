@@ -1,17 +1,19 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, Image, TouchableHighlight } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Voice from "@react-native-voice/voice";
 import Permissions from 'react-native-permissions';
 import Sound from 'react-native-sound';
+import { Buffer } from 'buffer';
 import AudioRecord from 'react-native-audio-record';
 import axios from "axios";
 import PushNotification from "react-native-push-notification"; 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { RecordButton } from "../../components/atoms/Button";
+import { TextBox } from "../../components/molecules/Box";
 
 // const baseUrl = "http://10.0.2.2:5000"
 const baseUrl = "http://127.0.0.1:5000"
 class Invoice extends Component {
+  
   sound = null
   state = {
     recognized: "",
@@ -40,8 +42,6 @@ class Invoice extends Component {
 
   async componentDidMount() {
     await this.checkPermission();
-
-
     const options = {
       sampleRate: 16000,
       channels: 1,
@@ -51,7 +51,10 @@ class Invoice extends Component {
 
     AudioRecord.init(options);
 
-
+    AudioRecord.on('data', data => {
+      const chunk = Buffer.from(data, 'base64');
+      // console.log('chunk size', chunk.byteLength);
+    });
   }
 
   componentWillUnmount() {
@@ -109,23 +112,6 @@ class Invoice extends Component {
     });
   };
 
-  load = () => {
-    return new Promise((resolve, reject) => {
-      if (!this.state.audioFile) {
-        return reject('file path is empty');
-      }
-
-      this.sound = new Sound(this.state.audioFile, '', error => {
-        if (error) {
-          console.log('failed to load the file', error);
-          return reject(error);
-        }
-        this.setState({ loaded: true });
-        return resolve();
-      });
-    });
-  };
-
   play = async () => {
     if (!this.state.loaded) {
       try {
@@ -145,13 +131,7 @@ class Invoice extends Component {
         console.log('playback failed due to audio decoding errors');
       }
       this.setState({ paused: true });
-      // this.sound.release();
     });
-  };
-
-  pause = () => {
-    this.sound.pause();
-    this.setState({ paused: true });
   };
 
   onSpeechStart = e => {
@@ -235,9 +215,9 @@ class Invoice extends Component {
 
     try {
       await Voice.start("ko-KR")
-            console.log('start record');
-            this.setState({ audioFile: '', recording: true, loaded: false });
-            AudioRecord.start();
+        console.log('start record');
+        this.setState({ audioFile: '', recording: true, loaded: false });
+        AudioRecord.start();
     } catch (e) {
       console.error(e)
     }
@@ -281,39 +261,35 @@ class Invoice extends Component {
     this.start();
   }
 
- //  this.handleNodtification이 api/stt_text 호출할때 안됨 코드 리팩토링할때 고려ㅅ
-  // handleNotification = (score) => {
-  //   scoreNum = Number(score)
-  //   if(scoreNum>=0.5){
-  //     message = "보이스피싱이 맞습니다."
-  //   }else{
-  //     message = "보이스피싱이 아닙니다."
-  //   }
-  //   PushNotification.localNotification({
-  //     message
-  //   });
-  // }
+  ConditionalText = (isRecording) => {
+    if(isRecording===true){
+      return "듣고있어요"
+    }else{
+      return "아래 마이크를 누르고 말해주세요"
+    }
+  }
 
   render() {
+    const instructionText  = this.ConditionalText(this.state.recording)
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>보이스 피싱 검출 AI</Text>
-        <Text style={styles.instructions}>
-          아래 마이크를 누르고 말하세요.
+        <Text style={styles.headText}>
+          보이스 피싱 검출 AI
         </Text>
-        <View style={styles.buttonList} >
-          <Ionicons onPress={this.startRecordRecognizing} name={"mic-circle-outline"} size={70} color={"dodgerblue"} /> 
-          <Ionicons onPress={this._stopRecognizing} name={"stop-circle-outline"} size={70} color={"dodgerblue"} /> 
+        <Text style={styles.instruction}>
+          {instructionText}
+        </Text>
+        <View style={styles.recordButton} >
+          <RecordButton
+            isRecording={this.state.recording}
+            onStart={this.startRecordRecognizing}
+            onStop={this._stopRecognizing}
+            size={100}
+          />
         </View>
-        <View style={styles.resultBox}>
-          {this.state.partialResults.map((result, index) => {
-            return (
-              <Text style={styles.resultText} key={`partial-result-${index}`}>
-                {result}
-              </Text>
-            )
-          })}
-        </View>
+        <TextBox
+          partialResults={this.state.partialResults}
+        />
       </View>
     )
   }
@@ -326,17 +302,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F5FCFF"
   },
-  button: {
-    width: 50,
-    height: 50
+  recordButton: {
+    margin: 25
   },
-  buttonList: {
-    flexDirection: "row",
-    marginBottom: 50
-
-  },
-  welcome: {
-    fontSize: 20,
+  headText: {
+    fontSize: 25,
     textAlign: "center",
     margin: 10
   },
@@ -346,8 +316,9 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     fontWeight: "bold"
   },
-  instructions: {
+  instruction: {
     textAlign: "center",
+    fontSize: 16,
     color: "#333333",
     marginBottom: 5
   },
