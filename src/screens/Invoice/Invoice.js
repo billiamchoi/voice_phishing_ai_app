@@ -2,16 +2,13 @@ import React, { Component } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Voice from "@react-native-voice/voice";
 import Permissions from 'react-native-permissions';
-import Sound from 'react-native-sound';
 import { Buffer } from 'buffer';
 import AudioRecord from 'react-native-audio-record';
-import axios from "axios";
 import PushNotification from "react-native-push-notification"; 
 import { RecordButton } from "../../components/atoms/Button";
 import { TextBox } from "../../components/molecules/Box";
+import {axiosInstance} from "../../utils";
 
-// const baseUrl = "http://10.0.2.2:5000"
-const baseUrl = "http://127.0.0.1:5000"
 class Invoice extends Component {
   
   sound = null
@@ -53,7 +50,6 @@ class Invoice extends Component {
 
     AudioRecord.on('data', data => {
       const chunk = Buffer.from(data, 'base64');
-      // console.log('chunk size', chunk.byteLength);
     });
   }
 
@@ -82,13 +78,14 @@ class Invoice extends Component {
   stop = async () => {
     if (!this.state.recording) return;
     console.log('stop record');
+
     let audioFile = await AudioRecord.stop();
     let audio = {
       uri: `file://${audioFile}`,
       type: 'audio/wav',
       name: 'test'
     }
-
+      
     let body = new FormData();
 
     body.append('file_name', audio.name)
@@ -96,42 +93,32 @@ class Invoice extends Component {
 
     console.log('audioFile', audioFile);
     this.setState({ audioFile, recording: false });
-
-    axios.post(`${baseUrl}/api/stt_voice`, body,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }
-    )
-    .then(function (response) {
-      console.log(response);
+    
+    axiosInstance.request({
+      contentType: 'multipart/form-data',
+      method: 'POST',
+      url   : 'api/stt_voice',
+      data  : body
     })
-    .catch(function (error) {
-      console.log(error);
-    });
-  };
 
-  play = async () => {
-    if (!this.state.loaded) {
-      try {
-        await this.load();
-      } catch (error) {
-        console.log(error);
+    axiosInstance.request({
+      contentType: 'application/json',
+      method: 'POST',
+      url   : 'api/stt_text',
+      data  : {
+        text: this.state.partialResults[0]
       }
-    }
-
-    this.setState({ paused: false });
-    Sound.setCategory('Playback');
-
-    this.sound.play(success => {
-      if (success) {
-        console.log('successfully finished playing');
-      } else {
-        console.log('playback failed due to audio decoding errors');
+    })
+    .then(function (response) {
+      console.log("predict_score is : ", response.data);
+      scoreNum = Number(response.data)
+      if(scoreNum>=0.5){
+        message = "보이스피싱이 맞습니다."
+      }else{
+        message = "보이스피싱이 아닙니다."
       }
-      this.setState({ paused: true });
-    });
+      PushNotification.localNotification({message});
+    })
   };
 
   onSpeechStart = e => {
@@ -142,61 +129,38 @@ class Invoice extends Component {
   }
 
   onSpeechRecognized = e => {
-    // console.log("onSpeechRecognized: ", e)
     this.setState({
       recognized: "√"
     })
   }
 
   onSpeechEnd = e => {
-    console.log("끝났다 이자식아")
+    console.log("스피치 끝")
     this.stop()
     this.setState({
       end: "√"
     })
-    axios.post(`${baseUrl}/api/stt_text`, {
-      text: this.state.partialResults[0]
-    })
-    .then(function (response) {
-      console.log("predict_score is : ", response.data);
-      scoreNum = Number(response.data)
-      if(scoreNum>=0.5){
-        message = "보이스피싱이 맞습니다."
-      }else{
-        message = "보이스피싱이 아닙니다."
-      }
-      PushNotification.localNotification({
-        message
-      });
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
   }
 
   onSpeechError = e => {
-    // console.log("onSpeechError: ", e)
     this.setState({
       error: JSON.stringify(e.error)
     })
   }
 
   onSpeechResults = e => {
-    // console.log("onSpeechResults: ", e)
     this.setState({
       results: e.value
     })
   }
 
   onSpeechPartialResults = e => {
-    // console.log("onSpeechPartialResults: ", e)
     this.setState({
       partialResults: e.value
     })
   }
 
   onSpeechVolumeChanged = e => {
-    // console.log("onSpeechVolumeChanged: ", e)
     this.setState({
       pitch: e.value
     })
@@ -229,31 +193,6 @@ class Invoice extends Component {
     } catch (e) {
       console.error(e)
     }
-  }
-
-  _cancelRecognizing = async () => {
-    try {
-      await Voice.cancel()
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  _destroyRecognizer = async () => {
-    try {
-      await Voice.destroy()
-    } catch (e) {
-      console.error(e)
-    }
-    this.setState({
-      recognized: "",
-      pitch: "",
-      error: "",
-      started: "",
-      results: [],
-      partialResults: [],
-      end: ""
-    })
   }
 
   startRecordRecognizing = () => {
@@ -310,35 +249,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     margin: 10
   },
-  action: {
-    textAlign: "center",
-    color: "#0000FF",
-    marginVertical: 5,
-    fontWeight: "bold"
-  },
   instruction: {
     textAlign: "center",
     fontSize: 16,
     color: "#333333",
     marginBottom: 5
   },
-  stat: {
-    textAlign: "center",
-    color: "black",
-    marginBottom: 1
-  },
-  resultBox: {
-    marginTop: 10,
-    width: 330,
-    height: 400,
-    backgroundColor: "white",
-    borderWidth: 2,
-    padding: 10,
-    borderColor: "dodgerblue"
-  },
-  resultText: {
-    fontSize: 18
-  }
 })
 
 export default Invoice
