@@ -23,7 +23,8 @@ class Invoice extends Component {
     audioFile: '',
     recording: false,
     loaded: false,
-    paused: true
+    paused: true,
+    intervalId: null
   }
 
   constructor(props) {
@@ -69,29 +70,58 @@ class Invoice extends Component {
     return this.requestPermission();
   };
 
+  saveSttTextSeg = () => {
+    axiosInstance.request({
+      contentType: 'application/json',
+      method: 'POST',
+      url   : 'api/stt_text_seg',
+      data  : {
+        text: this.state.partialResults[0]
+      }
+    })
+    .then(function (response) {
+      console.log("predict_score is : ", response.data);
+      scoreNum = Number(response.data)
+      if(scoreNum>=0.5){
+        message = "보이스피싱이 맞습니다."
+      }else{
+        message = "보이스피싱이 아닙니다."
+      }
+      PushNotification.localNotification({message});
+    })
+  }
+
+  saveTextEverySecond = (secend) => {
+    let intervalId = setInterval(() => this.saveSttTextSeg(), secend*1000);
+    intervalId
+    this.setState({ intervalId: intervalId  })
+  }
+  
+
   start = () => {
     console.log('start record');
     this.setState({ audioFile: '', recording: true, loaded: false });
     AudioRecord.start();
+    this.saveTextEverySecond(3)
   };
 
   stop = async () => {
     if (!this.state.recording) return;
     console.log('stop record');
-
+    clearInterval(this.state.intervalId)
     let audioFile = await AudioRecord.stop();
+
     let audio = {
       uri: `file://${audioFile}`,
       type: 'audio/wav',
       name: 'test'
     }
-      
+    
     let body = new FormData();
 
     body.append('file_name', audio.name)
     body.append('file', audio)
 
-    console.log('audioFile', audioFile);
     this.setState({ audioFile, recording: false });
     
     axiosInstance.request({
