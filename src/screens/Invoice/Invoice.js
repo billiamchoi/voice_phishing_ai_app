@@ -24,7 +24,8 @@ class Invoice extends Component {
     recording: false,
     loaded: false,
     paused: true,
-    intervalId: null
+    intervalId: null,
+    segLen: 0
   }
 
   constructor(props) {
@@ -71,24 +72,30 @@ class Invoice extends Component {
   };
 
   saveSttTextSeg = () => {
-    axiosInstance.request({
-      contentType: 'application/json',
-      method: 'POST',
-      url   : 'api/stt_text_seg',
-      data  : {
-        text: this.state.partialResults[0]
-      }
-    })
-    .then(function (response) {
-      console.log("predict_score is : ", response.data);
-      scoreNum = Number(response.data)
-      if(scoreNum>=0.5){
-        message = "보이스피싱이 맞습니다."
-      }else{
-        message = "보이스피싱이 아닙니다."
-      }
-      PushNotification.localNotification({message});
-    })
+    
+    const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
+    this.setState({ segLen : this.state.partialResults[0].length })
+
+    if(seg.length !== 0){
+      axiosInstance.request({
+        contentType: 'application/json',
+        method: 'POST',
+        url   : 'api/stt_text_seg',
+        data  : {
+          text: seg
+        }
+      })
+      .then(function (response) {
+        console.log("predict_score is : ", response.data);
+        scoreNum = Number(response.data)
+        if(scoreNum>=0.5){
+          message = "보이스피싱이 맞습니다."
+        }else{
+          message = "보이스피싱이 아닙니다."
+        }
+        PushNotification.localNotification({message});
+      })
+    }
   }
 
   saveTextEverySecond = (secend) => {
@@ -97,7 +104,6 @@ class Invoice extends Component {
     this.setState({ intervalId: intervalId  })
   }
   
-
   start = () => {
     console.log('start record');
     this.setState({ audioFile: '', recording: true, loaded: false });
@@ -136,7 +142,7 @@ class Invoice extends Component {
       method: 'POST',
       url   : 'api/stt_text',
       data  : {
-        text: this.state.partialResults[0]
+        text: this.state.results[0]
       }
     })
     .then(function (response) {
@@ -257,7 +263,7 @@ class Invoice extends Component {
           />
         </View>
         <TextBox
-          partialResults={this.state.partialResults}
+          partialResults={this.state.results}
         />
       </View>
     )
