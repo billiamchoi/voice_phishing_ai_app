@@ -8,7 +8,8 @@ import PushNotification from "react-native-push-notification";
 import { RecordButton } from "../../components/atoms/Button";
 import { TextBox } from "../../components/molecules/Box";
 import {axiosInstance} from "../../utils";
-
+import { v4 as uuidv4 } from 'uuid';
+import {RNFS, DocumentDirectoryPath, writeFile} from 'react-native-fs';
 class Invoice extends Component {
   
   sound = null
@@ -16,16 +17,19 @@ class Invoice extends Component {
     recognized: "",
     pitch: "",
     error: "",
-    end: "",
+    end: true,
     started: "",
     results: [],
     partialResults: [],
     audioFile: '',
+    audioFileName: '',
     recording: false,
     loaded: false,
     paused: true,
     intervalId: null,
-    segLen: 0
+    segLen: 0,
+    audioCounter: 1,
+    isButtonPressed: false
   }
 
   constructor(props) {
@@ -51,7 +55,7 @@ class Invoice extends Component {
     AudioRecord.init(options);
 
     AudioRecord.on('data', data => {
-      const chunk = Buffer.from(data, 'base64');
+      const chunk = Buffer.from(data, 'base64'); 
     });
   }
 
@@ -72,43 +76,98 @@ class Invoice extends Component {
   };
 
   saveSttTextSeg = () => {
-    
-    const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
-    this.setState({ segLen : this.state.partialResults[0].length })
+    if (typeof(this.state.partialResults[0]) !== 'undefined'){
+      const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
+      this.setState({ segLen : this.state.partialResults[0].length })
+      if(seg.length !== 0){
+        axiosInstance.request({
+          contentType: 'application/json',
+          method: 'POST',
+          url   : 'api/stt_text_seg',
+          data  : {
+            text: seg
+          }
+        })
+        .then(function (response) {
+          console.log("predict_score is : ", response.data);
+          scoreNum = Number(response.data)
+          if(scoreNum>=0.5){
+            message = "보이스피싱이 맞습니다."
+          }else{
+            message = "보이스피싱이 아닙니다."
+          }
+          PushNotification.localNotification({message});
+        }) 
+      }
+    } 
+  }
+  
+  saveSttAudioSeg = async() => {
+    // if (!this.state.recording) return;
+    console.log('stop record');
+    let audioFile = await AudioRecord.stop();
 
-    if(seg.length !== 0){
-      axiosInstance.request({
-        contentType: 'application/json',
-        method: 'POST',
-        url   : 'api/stt_text_seg',
-        data  : {
-          text: seg
-        }
-      })
-      .then(function (response) {
-        console.log("predict_score is : ", response.data);
-        scoreNum = Number(response.data)
-        if(scoreNum>=0.5){
-          message = "보이스피싱이 맞습니다."
-        }else{
-          message = "보이스피싱이 아닙니다."
-        }
-        PushNotification.localNotification({message});
-      })
+    let audio = {
+      uri: `file://${audioFile}`,
+      type: 'audio/wav',
+      name: 'test'
     }
+    
+    let body = new FormData();
+    
+    body.append('directory_name', this.state.audioFileName)
+    body.append('file_name', this.state.audioCounter)
+    body.append('file', audio)
+
+    this.setState({ audioFile, audioCounter: this.state.audioCounter + 1 });
+    
+    axiosInstance.request({
+      contentType: 'multipart/form-data',
+      method: 'POST',
+      url   : 'api/stt_voice_seg',
+      data  : body
+    })
+    .then(response => {
+      console.log('success');
+      this.setState({ audioFile: '', recording: true, loaded: false });
+      AudioRecord.start();
+    })
+    .catch(err => {
+        console.log('error');
+        console.log(err.status);
+        console.log(err.response.status)
+    });
   }
 
-  saveTextEverySecond = (secend) => {
-    let intervalId = setInterval(() => this.saveSttTextSeg(), secend*1000);
+  saveTextNVoiceEverySecond = (secend) => {
+    let intervalId = setInterval(() => 
+    {
+      this.saveSttAudioSeg()
+      this.saveSttTextSeg()
+    }, secend*1000);
     intervalId
     this.setState({ intervalId: intervalId  })
+  }
+
+  createDir = async () => {
+    await this.setState({ audioFileName : uuidv4()})
+    await axiosInstance.request({
+      contentType: 'application/json',
+      method: 'POST',
+      url   : 'api/start_record',
+      data  : {
+        file_name : this.state.audioFileName
+      }
+    })
   }
   
   start = () => {
     console.log('start record');
-    this.setState({ audioFile: '', recording: true, loaded: false });
+    this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1 });
     AudioRecord.start();
-    this.saveTextEverySecond(3)
+    this.createDir()
+    this.saveTextNVoiceEverySecond(5)
+    
   };
 
   stop = async () => {
@@ -125,7 +184,8 @@ class Invoice extends Component {
     
     let body = new FormData();
 
-    body.append('file_name', audio.name)
+    body.append('directory_name', this.state.audioFileName)
+    body.append('file_name', this.state.audioCounter)
     body.append('file', audio)
 
     this.setState({ audioFile, recording: false });
@@ -133,7 +193,7 @@ class Invoice extends Component {
     axiosInstance.request({
       contentType: 'multipart/form-data',
       method: 'POST',
-      url   : 'api/stt_voice',
+      url   : 'api/stt_voice_seg',
       data  : body
     })
 
@@ -155,12 +215,18 @@ class Invoice extends Component {
       }
       PushNotification.localNotification({message});
     })
+
+    this.setState({isButtonPressed: false})
   };
+
+
+
 
   onSpeechStart = e => {
     console.log("onSpeechStart: ", e)
     this.setState({
-      started: "√"
+      started: "√",
+      end: false
     })
   }
 
@@ -171,10 +237,9 @@ class Invoice extends Component {
   }
 
   onSpeechEnd = e => {
-    console.log("스피치 끝")
     this.stop()
     this.setState({
-      end: "√"
+      end: true
     })
   }
 
@@ -209,8 +274,7 @@ class Invoice extends Component {
       error: "",
       started: "",
       results: [],
-      partialResults: [],
-      end: ""
+      partialResults: []
     })
 
     try {
