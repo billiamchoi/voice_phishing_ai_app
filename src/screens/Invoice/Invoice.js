@@ -29,7 +29,9 @@ class Invoice extends Component {
     intervalId: null,
     segLen: 0,
     audioCounter: 1,
-    isButtonPressed: false
+    isButtonPressed: false,
+    sr : 16000,
+    second: 5
   }
 
   constructor(props) {
@@ -118,6 +120,8 @@ class Invoice extends Component {
     body.append('directory_name', this.state.audioFileName)
     body.append('file_name', this.state.audioCounter)
     body.append('file', audio)
+    body.append('sr', this.state.sr)
+    body.append('second', this.state.second)
 
     this.setState({ audioFile, audioCounter: this.state.audioCounter + 1 });
     
@@ -128,7 +132,15 @@ class Invoice extends Component {
       data  : body
     })
     .then(response => {
-      console.log('success');
+      console.log("predict_score is : ", response.data);
+      scoreNum = Number(response.data)
+      if(scoreNum>=0.5){
+        message = "음성데이터 기준 보이스피싱이 맞습니다."
+      }else{
+        message = "음성데이터 기준 보이스피싱이 아닙니다."
+      }
+      PushNotification.localNotification({message});
+
       this.setState({ audioFile: '', recording: true, loaded: false });
       AudioRecord.start();
     })
@@ -167,7 +179,6 @@ class Invoice extends Component {
     AudioRecord.start();
     this.createDir()
     this.saveTextNVoiceEverySecond(5)
-    
   };
 
   stop = async () => {
@@ -187,6 +198,8 @@ class Invoice extends Component {
     body.append('directory_name', this.state.audioFileName)
     body.append('file_name', this.state.audioCounter)
     body.append('file', audio)
+    body.append('sr', this.state.sr)
+    body.append('second', this.state.second)
 
     this.setState({ audioFile, recording: false });
     
@@ -196,6 +209,17 @@ class Invoice extends Component {
       url   : 'api/stt_voice_seg',
       data  : body
     })
+    .then(function (response) {
+      console.log("predict_score is : ", response.data);
+      scoreNum = Number(response.data)
+      if(scoreNum>=0.5){
+        message = "음성데이터 기준 보이스피싱이 맞습니다."
+      }else{
+        message = "음성데이터 기준 보이스피싱이 아닙니다."
+      }
+      PushNotification.localNotification({message});
+    }) 
+    
 
     axiosInstance.request({
       contentType: 'application/json',
