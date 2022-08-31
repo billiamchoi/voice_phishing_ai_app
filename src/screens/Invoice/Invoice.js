@@ -9,7 +9,6 @@ import { RecordButton } from "../../components/atoms/Button";
 import { TextBox } from "../../components/molecules/Box";
 import {axiosInstance} from "../../utils";
 import { v4 as uuidv4 } from 'uuid';
-import {RNFS, DocumentDirectoryPath, writeFile} from 'react-native-fs';
 class Invoice extends Component {
   
   sound = null
@@ -31,7 +30,7 @@ class Invoice extends Component {
     audioCounter: 1,
     isButtonPressed: false,
     sr : 16000,
-    second: 5
+    second: 30
   }
 
   constructor(props) {
@@ -95,10 +94,11 @@ class Invoice extends Component {
           scoreNum = Number(response.data)
           if(scoreNum>=0.5){
             message = "보이스피싱이 맞습니다."
+            PushNotification.localNotification({message});
           }else{
-            message = "보이스피싱이 아닙니다."
+            message = "보이스피싱이 맞습니다."
           }
-          PushNotification.localNotification({message});
+          
         }) 
       }
     } 
@@ -132,14 +132,14 @@ class Invoice extends Component {
       data  : body
     })
     .then(response => {
-      console.log("predict_score is : ", response.data);
+      console.log("보이스 predict_score is : ", response.data);
       scoreNum = Number(response.data)
       if(scoreNum>=0.5){
-        message = "음성데이터 기준 보이스피싱이 맞습니다."
+        message = "보이스피싱이 맞습니다."
+        PushNotification.localNotification({message});
       }else{
-        message = "음성데이터 기준 보이스피싱이 아닙니다."
+        message = "보이스피싱이 맞습니다."
       }
-      PushNotification.localNotification({message});
 
       this.setState({ audioFile: '', recording: true, loaded: false });
       AudioRecord.start();
@@ -151,14 +151,19 @@ class Invoice extends Component {
     });
   }
 
-  saveTextNVoiceEverySecond = (secend) => {
-    let intervalId = setInterval(() => 
+  saveTextNVoiceEverySecond = (textSecond, voiceSecond) => {
+    let textIntervalId = setInterval(() => 
+    {
+      this.saveSttTextSeg()
+    }, textSecond*1000);
+    let voiceIntervalId = setInterval(() => 
     {
       this.saveSttAudioSeg()
-      this.saveSttTextSeg()
-    }, secend*1000);
-    intervalId
-    this.setState({ intervalId: intervalId  })
+    }, voiceSecond*1000);
+    textIntervalId
+    voiceIntervalId
+    this.setState({ textIntervalId: textIntervalId  })
+    this.setState({ voiceIntervalId: voiceIntervalId  })
   }
 
   createDir = async () => {
@@ -178,13 +183,14 @@ class Invoice extends Component {
     this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1 });
     AudioRecord.start();
     this.createDir()
-    this.saveTextNVoiceEverySecond(5)
+    this.saveTextNVoiceEverySecond(5,30)
   };
 
   stop = async () => {
     if (!this.state.recording) return;
     console.log('stop record');
-    clearInterval(this.state.intervalId)
+    clearInterval(this.state.textIntervalId)
+    clearInterval(this.state.voiceIntervalId)
     let audioFile = await AudioRecord.stop();
 
     let audio = {
@@ -210,14 +216,15 @@ class Invoice extends Component {
       data  : body
     })
     .then(function (response) {
-      console.log("predict_score is : ", response.data);
+      console.log("보이스 predict_score is : ", response.data);
       scoreNum = Number(response.data)
       if(scoreNum>=0.5){
-        message = "음성데이터 기준 보이스피싱이 맞습니다."
+        message = "보이스피싱이 맞습니다."
+        PushNotification.localNotification({message});
       }else{
-        message = "음성데이터 기준 보이스피싱이 아닙니다."
+        message = "보이스피싱이 맞습니다."
       }
-      PushNotification.localNotification({message});
+      
     }) 
     
 
@@ -234,10 +241,10 @@ class Invoice extends Component {
       scoreNum = Number(response.data)
       if(scoreNum>=0.5){
         message = "보이스피싱이 맞습니다."
+        PushNotification.localNotification({message});
       }else{
-        message = "보이스피싱이 아닙니다."
+        message = "보이스피싱이 맞습니다."
       }
-      PushNotification.localNotification({message});
     })
 
     this.setState({isButtonPressed: false})
