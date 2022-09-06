@@ -27,10 +27,12 @@ class Invoice extends Component {
     paused: true,
     intervalId: null,
     segLen: 0,
+    segIdx: 0,
     audioCounter: 1,
     isButtonPressed: false,
     sr : 16000,
-    second: 30
+    second: 30,
+    highlight: []
   }
 
   constructor(props) {
@@ -76,10 +78,17 @@ class Invoice extends Component {
     return this.requestPermission();
   };
 
+  setHighlight = (start,end) => {
+    this.state.highlight.push(start,end)
+  };
+
   saveSttTextSeg = () => {
     if (typeof(this.state.partialResults[0]) !== 'undefined'){
       const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
+      let startIdx = this.state.segLen
+      let endIdx = this.state.partialResults[0].length
       this.setState({ segLen : this.state.partialResults[0].length })
+      this.setState({ segIdx : this.state.segLen})
       if(seg.length !== 0){
         axiosInstance.request({
           contentType: 'application/json',
@@ -95,11 +104,9 @@ class Invoice extends Component {
           if(scoreNum>=0.5){
             message = "보이스피싱이 맞습니다."
             PushNotification.localNotification({message});
-          }else{
-            message = "보이스피싱이 맞습니다."
+            this.setHighlight(startIdx,endIdx)
           }
-          
-        }) 
+        }.bind(this)) 
       }
     } 
   }
@@ -137,10 +144,7 @@ class Invoice extends Component {
       if(scoreNum>=0.5){
         message = "보이스피싱이 맞습니다."
         PushNotification.localNotification({message});
-      }else{
-        message = "보이스피싱이 맞습니다."
       }
-
       this.setState({ audioFile: '', recording: true, loaded: false });
       AudioRecord.start();
     })
@@ -180,7 +184,7 @@ class Invoice extends Component {
   
   start = () => {
     console.log('start record');
-    this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1 });
+    this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1, highlight: []});
     AudioRecord.start();
     this.createDir()
     this.saveTextNVoiceEverySecond(5,30)
@@ -221,13 +225,9 @@ class Invoice extends Component {
       if(scoreNum>=0.5){
         message = "보이스피싱이 맞습니다."
         PushNotification.localNotification({message});
-      }else{
-        message = "보이스피싱이 맞습니다."
       }
-      
     }) 
     
-
     axiosInstance.request({
       contentType: 'application/json',
       method: 'POST',
@@ -242,16 +242,11 @@ class Invoice extends Component {
       if(scoreNum>=0.5){
         message = "보이스피싱이 맞습니다."
         PushNotification.localNotification({message});
-      }else{
-        message = "보이스피싱이 맞습니다."
       }
     })
 
     this.setState({isButtonPressed: false})
   };
-
-
-
 
   onSpeechStart = e => {
     console.log("onSpeechStart: ", e)
@@ -359,6 +354,7 @@ class Invoice extends Component {
         </View>
         <TextBox
           partialResults={this.state.results}
+          highlight={this.state.highlight}
         />
       </View>
     )
