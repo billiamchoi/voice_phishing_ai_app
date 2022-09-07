@@ -316,6 +316,7 @@ class Invoice extends Component {
   _stopRecognizing = async () => {
     try {
       await Voice.stop()
+      this.setState({ recording: false })
     } catch (e) {
       console.error(e)
     }
