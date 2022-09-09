@@ -1,6 +1,7 @@
 import React, { Component } from "react"
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, ScrollView } from "react-native";
 import { v4 as uuidv4 } from 'uuid';
+import AutoScrollView from 'react-native-auto-scroll-view';
 
 export default class TextBox extends Component {
   
@@ -28,10 +29,9 @@ export default class TextBox extends Component {
     return(
       <View style={styles.textBox}>
         {this.props.partialResults.map((result, index) => {
-          const hightlightText = this.setHighlight(result,this.props.highlight)
           return (
             <Text style={styles.resultText} key={`partial-result-${index}`}>
-              { hightlightText }
+              { result }
             </Text>
           )
         })}
@@ -39,7 +39,6 @@ export default class TextBox extends Component {
     )
   }
 }
-
 
 const styles = StyleSheet.create({
   textBox: {
@@ -49,7 +48,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderWidth: 2,
     padding: 10,
-    borderColor: "dodgerblue"
+    borderColor: "dodgerblue",
   },
   resultText: {
     fontSize: 18

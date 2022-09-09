@@ -191,7 +191,8 @@ class Invoice extends Component {
   };
 
   stop = async () => {
-    if (!this.state.recording) return;
+    // if (!this.state.recording) return;
+    this.setState({recording: false})
     console.log('stop record');
     clearInterval(this.state.textIntervalId)
     clearInterval(this.state.voiceIntervalId)
@@ -211,7 +212,7 @@ class Invoice extends Component {
     body.append('sr', this.state.sr)
     body.append('second', this.state.second)
 
-    this.setState({ audioFile, recording: false });
+    this.setState({ audioFile });
     
     axiosInstance.request({
       contentType: 'multipart/form-data',
@@ -228,22 +229,7 @@ class Invoice extends Component {
       }
     }) 
     
-    axiosInstance.request({
-      contentType: 'application/json',
-      method: 'POST',
-      url   : 'api/stt_text',
-      data  : {
-        text: this.state.results[0]
-      }
-    })
-    .then(function (response) {
-      console.log("predict_score is : ", response.data);
-      scoreNum = Number(response.data)
-      if(scoreNum>=0.5){
-        message = "보이스피싱이 맞습니다."
-        PushNotification.localNotification({message});
-      }
-    })
+    this.saveSttTextSeg()
 
     this.setState({isButtonPressed: false})
   };
@@ -264,8 +250,9 @@ class Invoice extends Component {
 
   onSpeechEnd = e => {
     this.stop()
+    
     this.setState({
-      end: true
+      end: true,
     })
   }
 
@@ -316,7 +303,6 @@ class Invoice extends Component {
   _stopRecognizing = async () => {
     try {
       await Voice.stop()
-      this.setState({ recording: false })
     } catch (e) {
       console.error(e)
     }

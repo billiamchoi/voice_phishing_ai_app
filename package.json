@@ -20,7 +20,7 @@
     "react-devtools": "^4.25.0",
     "react-native": "0.69.3",
     "react-native-audio-record": "^0.2.2",
-    "react-native-fs": "^2.20.0",
+    "react-native-auto-scroll-view": "^1.0.1",
     "react-native-permissions": "^3.6.0",
     "react-native-push-notification": "^8.1.1",
     "react-native-responsive-screen": "^1.4.2",
