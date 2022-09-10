@@ -191,6 +191,7 @@ class Invoice extends Component {
     console.log('stop record');
     clearInterval(this.state.textIntervalId)
     clearInterval(this.state.voiceIntervalId)
+    clearTimeout(this.state.timeoutId)
     let audioFile = await AudioRecord.stop()
     
     let audio = {
@@ -296,6 +297,7 @@ class Invoice extends Component {
     try {
       clearInterval(this.state.textIntervalId)
       clearInterval(this.state.voiceIntervalId)
+      clearTimeout(this.state.timeoutId)
       await Voice.stop()
       await this.setState({recording : false, isFetching: true})
       if(typeof(this.state.partialResults[0]) === 'undefined') {
@@ -310,6 +312,12 @@ class Invoice extends Component {
     this.setState({recording: true})
     this._startRecognizing();
     this.start();
+    let timeoutId = setTimeout(() => {
+      this._stopRecognizing()
+      clearTimeout(this.state.timeoutId)
+    }, 60000)
+    timeoutId
+    this.setState({timeoutId:timeoutId})
   }
 
   ConditionalText = (isRecording, isFetching) => {
