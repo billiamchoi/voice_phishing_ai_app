@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import Voice from "@react-native-voice/voice";
 import Permissions from 'react-native-permissions';
 import { Buffer } from 'buffer';
@@ -104,9 +104,9 @@ class Invoice extends Component {
           if(scoreNum>=0.5){
             message = "보이스피싱이 맞습니다."
             PushNotification.localNotification({message});
-            this.setHighlight(startIdx,endIdx)
+            
           }
-        }.bind(this)) 
+        }) 
       }
     } 
   }
@@ -323,11 +323,13 @@ class Invoice extends Component {
 
   render() {
     const instructionText  = this.ConditionalText(this.state.recording)
+    console.log("check rerender", this.state.recording)
     return (
       <View style={styles.container}>
-        <Text style={styles.headText}>
-          보이스 피싱 검출 AI
-        </Text>
+        <Image
+        style={styles.logo}
+        source={require('../../Assets/Images/watchmanLogo.png')}
+        />
         <Text style={styles.instruction}>
           {instructionText}
         </Text>
@@ -369,6 +371,12 @@ const styles = StyleSheet.create({
     color: "#333333",
     marginBottom: 5
   },
+  logo: {
+    width: 300,
+    height: 50,
+    resizeMode: 'contain',
+    margin: 30
+  }
 })
 
 export default Invoice

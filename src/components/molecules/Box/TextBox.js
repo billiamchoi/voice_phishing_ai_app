@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     width: 330,
     height: 400,
     backgroundColor: "white",
-    borderWidth: 2,
+    borderWidth: 1,
     padding: 10,
     borderColor: "dodgerblue",
   },
