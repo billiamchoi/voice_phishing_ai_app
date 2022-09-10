@@ -42,5 +42,8 @@
   },
   "jest": {
     "preset": "react-native"
+  },
+  "overrides": {
+    "react-devtools-core": "~4.25.0"
   }
 }
