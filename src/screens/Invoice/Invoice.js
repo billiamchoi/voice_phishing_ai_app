@@ -31,8 +31,9 @@ class Invoice extends Component {
     audioCounter: 1,
     isButtonPressed: false,
     sr : 16000,
-    second: 30,
-    highlight: []
+    second: 5,
+    highlight: [],
+    isFetching: false,
   }
 
   constructor(props) {
@@ -85,8 +86,8 @@ class Invoice extends Component {
   saveSttTextSeg = () => {
     if (typeof(this.state.partialResults[0]) !== 'undefined'){
       const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
-      let startIdx = this.state.segLen
-      let endIdx = this.state.partialResults[0].length
+      // let startIdx = this.state.segLen
+      // let endIdx = this.state.partialResults[0].length
       this.setState({ segLen : this.state.partialResults[0].length })
       this.setState({ segIdx : this.state.segLen})
       if(seg.length !== 0){
@@ -104,18 +105,14 @@ class Invoice extends Component {
           if(scoreNum>=0.5){
             message = "보이스피싱이 맞습니다."
             PushNotification.localNotification({message});
-            
           }
-        }) 
+        }.bind(this) )
       }
     } 
   }
   
   saveSttAudioSeg = async() => {
-    // if (!this.state.recording) return;
-    console.log('stop record');
     let audioFile = await AudioRecord.stop();
-
     let audio = {
       uri: `file://${audioFile}`,
       type: 'audio/wav',
@@ -156,11 +153,11 @@ class Invoice extends Component {
   }
 
   saveTextNVoiceEverySecond = (textSecond, voiceSecond) => {
-    let textIntervalId = setInterval(() => 
+    let textIntervalId = setInterval(async () => 
     {
-      this.saveSttTextSeg()
+      await this.saveSttTextSeg()
     }, textSecond*1000);
-    let voiceIntervalId = setInterval(() => 
+    let voiceIntervalId = setInterval(async() => 
     {
       this.saveSttAudioSeg()
     }, voiceSecond*1000);
@@ -187,17 +184,15 @@ class Invoice extends Component {
     this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1, highlight: []});
     AudioRecord.start();
     this.createDir()
-    this.saveTextNVoiceEverySecond(5,30)
+    this.saveTextNVoiceEverySecond(5,5)
   };
 
   stop = async () => {
-    // if (!this.state.recording) return;
-    this.setState({recording: false})
     console.log('stop record');
     clearInterval(this.state.textIntervalId)
     clearInterval(this.state.voiceIntervalId)
-    let audioFile = await AudioRecord.stop();
-
+    let audioFile = await AudioRecord.stop()
+    
     let audio = {
       uri: `file://${audioFile}`,
       type: 'audio/wav',
@@ -214,24 +209,22 @@ class Invoice extends Component {
 
     this.setState({ audioFile });
     
-    axiosInstance.request({
+    await axiosInstance.request({
       contentType: 'multipart/form-data',
       method: 'POST',
       url   : 'api/stt_voice_seg',
       data  : body
     })
     .then(function (response) {
+      this.setState({isFetching: false})
       console.log("보이스 predict_score is : ", response.data);
       scoreNum = Number(response.data)
       if(scoreNum>=0.5){
         message = "보이스피싱이 맞습니다."
         PushNotification.localNotification({message});
       }
-    }) 
-    
-    this.saveSttTextSeg()
-
-    this.setState({isButtonPressed: false})
+    }.bind(this))  
+    await this.saveSttTextSeg()
   };
 
   onSpeechStart = e => {
@@ -250,7 +243,6 @@ class Invoice extends Component {
 
   onSpeechEnd = e => {
     this.stop()
-    
     this.setState({
       end: true,
     })
@@ -265,7 +257,7 @@ class Invoice extends Component {
   onSpeechResults = e => {
     this.setState({
       results: e.value
-    })
+    }) 
   }
 
   onSpeechPartialResults = e => {
@@ -302,28 +294,36 @@ class Invoice extends Component {
 
   _stopRecognizing = async () => {
     try {
+      clearInterval(this.state.textIntervalId)
+      clearInterval(this.state.voiceIntervalId)
       await Voice.stop()
+      await this.setState({recording : false, isFetching: true})
+      if(typeof(this.state.partialResults[0]) === 'undefined') {
+        this.setState({ isFetching: false })
+      }
     } catch (e) {
       console.error(e)
     }
   }
 
   startRecordRecognizing = () => {
+    this.setState({recording: true})
     this._startRecognizing();
     this.start();
   }
 
-  ConditionalText = (isRecording) => {
-    if(isRecording===true){
-      return "듣고있어요"
-    }else{
+  ConditionalText = (isRecording, isFetching) => {
+    if(isFetching===true){
+      return "안경 닦는중. . ."
+    }else if(isRecording===true){
+      return "듣고 있어요"
+    }else if (isRecording===false){
       return "아래 마이크를 누르고 말해주세요"
     }
   }
 
   render() {
-    const instructionText  = this.ConditionalText(this.state.recording)
-    console.log("check rerender", this.state.recording)
+    const instructionText  = this.ConditionalText(this.state.recording, this.state.isFetching)
     return (
       <View style={styles.container}>
         <Image
@@ -338,12 +338,12 @@ class Invoice extends Component {
             isRecording={this.state.recording}
             onStart={this.startRecordRecognizing}
             onStop={this._stopRecognizing}
+            isFetching={this.state.isFetching}
             size={100}
           />
         </View>
         <TextBox
           partialResults={this.state.results}
-          highlight={this.state.highlight}
         />
       </View>
     )
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5FCFF"
   },
   recordButton: {
-    margin: 25
+    flex: 0.5
   },
   headText: {
     fontSize: 25,
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     color: "#333333",
-    marginBottom: 5
+    marginBottom: 10
   },
   logo: {
     width: 300,

@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { Text, View, StyleSheet, ScrollView } from "react-native";
 import { v4 as uuidv4 } from 'uuid';
-import AutoScrollView from 'react-native-auto-scroll-view';
 
 export default class TextBox extends Component {
   
@@ -42,9 +41,9 @@ export default class TextBox extends Component {
 
 const styles = StyleSheet.create({
   textBox: {
-    marginTop: 10,
+    marginTop: 20,
     width: 330,
-    height: 400,
+    height: 410,
     backgroundColor: "white",
     borderWidth: 1,
     padding: 10,
