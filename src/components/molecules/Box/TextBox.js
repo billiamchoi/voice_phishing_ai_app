@@ -27,14 +27,10 @@ export default class TextBox extends Component {
   render = () => {
     return(
       <View style={styles.textBox}>
-        {this.props.partialResults.map((result, index) => {
-          return (
-            <Text style={styles.resultText} key={`partial-result-${index}`}>
-              { result }
-            </Text>
-          )
-        })}
-    </View>
+        <Text style={styles.resultText}>
+              { this.props.partialResults[0] }
+        </Text>
+      </View>
     )
   }
 }

@@ -83,7 +83,12 @@ class Invoice extends Component {
     this.state.highlight.push(start,end)
   };
 
-  saveSttTextSeg = () => {
+  saveSttTextSeg = (isLast) => {
+
+    if (isLast === "last"){
+      this.setState({isFetching: true})
+    }
+
     if (typeof(this.state.partialResults[0]) !== 'undefined'){
       const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
       // let startIdx = this.state.segLen
@@ -106,6 +111,12 @@ class Invoice extends Component {
             message = "보이스피싱이 맞습니다."
             PushNotification.localNotification({message});
           }
+        if (isLast === "last"){
+          let last = setTimeout(() => {
+            this.setState({isFetching: false, recording: false})
+          }, 1000)
+          last
+        }
         }.bind(this) )
       }
     } 
@@ -181,7 +192,7 @@ class Invoice extends Component {
   
   start = () => {
     console.log('start record');
-    this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1, highlight: []});
+    this.setState({ audioFile: '', recording: true, loaded: false, audioCounter: 1});
     AudioRecord.start();
     this.createDir()
     this.saveTextNVoiceEverySecond(5,5)
@@ -189,6 +200,8 @@ class Invoice extends Component {
 
   stop = async () => {
     console.log('stop record');
+    this.saveSttTextSeg("last")
+    this.setState({isFetching: true})
     clearInterval(this.state.textIntervalId)
     clearInterval(this.state.voiceIntervalId)
     clearTimeout(this.state.timeoutId)
@@ -217,15 +230,17 @@ class Invoice extends Component {
       data  : body
     })
     .then(function (response) {
-      this.setState({isFetching: false})
       console.log("보이스 predict_score is : ", response.data);
       scoreNum = Number(response.data)
       if(scoreNum>=0.5){
         message = "보이스피싱이 맞습니다."
         PushNotification.localNotification({message});
       }
+      let last = setTimeout(() => {
+        this.setState({isFetching: false, recording: false})
+      }, 1000)
+      last
     }.bind(this))  
-    await this.saveSttTextSeg()
   };
 
   onSpeechStart = e => {
@@ -295,14 +310,15 @@ class Invoice extends Component {
 
   _stopRecognizing = async () => {
     try {
+      await this.setState({recording : false ,isFetching: true})
       clearInterval(this.state.textIntervalId)
       clearInterval(this.state.voiceIntervalId)
       clearTimeout(this.state.timeoutId)
       await Voice.stop()
-      await this.setState({recording : false, isFetching: true})
       if(typeof(this.state.partialResults[0]) === 'undefined') {
         this.setState({ isFetching: false })
       }
+      
     } catch (e) {
       console.error(e)
     }
@@ -312,12 +328,6 @@ class Invoice extends Component {
     this.setState({recording: true})
     this._startRecognizing();
     this.start();
-    let timeoutId = setTimeout(() => {
-      this._stopRecognizing()
-      clearTimeout(this.state.timeoutId)
-    }, 60000)
-    timeoutId
-    this.setState({timeoutId:timeoutId})
   }
 
   ConditionalText = (isRecording, isFetching) => {
@@ -351,7 +361,7 @@ class Invoice extends Component {
           />
         </View>
         <TextBox
-          partialResults={this.state.results}
+          partialResults={this.state.partialResults}
         />
       </View>
     )
