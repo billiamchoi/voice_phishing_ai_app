@@ -9,6 +9,7 @@ import { RecordButton } from "../../components/atoms/Button";
 import { TextBox } from "../../components/molecules/Box";
 import {axiosInstance} from "../../utils";
 import { v4 as uuidv4 } from 'uuid';
+import {Colors, Sizes} from '../../styles'
 class Invoice extends Component {
   
   sound = null
@@ -32,7 +33,6 @@ class Invoice extends Component {
     isButtonPressed: false,
     sr : 16000,
     second: 5,
-    highlight: [],
     isFetching: false,
   }
 
@@ -79,20 +79,12 @@ class Invoice extends Component {
     return this.requestPermission();
   };
 
-  setHighlight = (start,end) => {
-    this.state.highlight.push(start,end)
-  };
-
   saveSttTextSeg = (isLast) => {
-
     if (isLast === "last"){
       this.setState({isFetching: true})
     }
-
     if (typeof(this.state.partialResults[0]) !== 'undefined'){
       const seg = this.state.partialResults[0].slice(this.state.segLen, this.state.partialResults[0].length)
-      // let startIdx = this.state.segLen
-      // let endIdx = this.state.partialResults[0].length
       this.setState({ segLen : this.state.partialResults[0].length })
       this.setState({ segIdx : this.state.segLen})
       if(seg.length !== 0){
@@ -301,7 +293,8 @@ class Invoice extends Component {
     try {
       await Voice.start("ko-KR")
         console.log('start record');
-        this.setState({ audioFile: '', recording: true, loaded: false });
+        
+        this.setState({ audioFile: '', loaded: false });
         AudioRecord.start();
     } catch (e) {
       console.error(e)
@@ -325,6 +318,7 @@ class Invoice extends Component {
   }
 
   startRecordRecognizing = () => {
+    
     this.setState({recording: true})
     this._startRecognizing();
     this.start();
@@ -346,7 +340,7 @@ class Invoice extends Component {
       <View style={styles.container}>
         <Image
         style={styles.logo}
-        source={require('../../Assets/Images/watchmanLogo.png')}
+        source={require('../../assets/Images/watchmanLogo.png')}
         />
         <Text style={styles.instruction}>
           {instructionText}
@@ -357,7 +351,7 @@ class Invoice extends Component {
             onStart={this.startRecordRecognizing}
             onStop={this._stopRecognizing}
             isFetching={this.state.isFetching}
-            size={100}
+            size={Sizes.Invoice.RecordButtonSize}
           />
         </View>
         <TextBox
@@ -373,20 +367,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5FCFF"
+    backgroundColor: Colors.BackgroundColor
   },
-  recordButton: {
+  recordButton: { 
     flex: 0.5
-  },
-  headText: {
-    fontSize: 25,
-    textAlign: "center",
-    margin: 10
   },
   instruction: {
     textAlign: "center",
-    fontSize: 16,
-    color: "#333333",
+    fontSize: Sizes.Invoice.InstructionFontSize,
+    color: Colors.Default.Black,
     marginBottom: 10
   },
   logo: {

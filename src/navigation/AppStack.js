@@ -2,8 +2,8 @@ import InvoiceStack from './InvoiceStack';
 import MyPageStack from './MyPageStack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import React from 'react'
+import { Sizes, Colors } from '../styles';
 
 const Tab = createBottomTabNavigator();
 
@@ -12,8 +12,10 @@ export default function TabScreen() {
         <Tab.Navigator sceneContainerStyle={{ backgroundColor: 'transparent' }} initialRouteName="인보이스" screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
                 let icon = getIconForTab(route, focused);
-                return <Ionicons name={icon} size={wp(5)} color={color} /> 
-            }
+                return <Ionicons name={icon} size={Sizes.BottomTab.Icon} color={color} /> 
+            },
+            tabBarActiveTintColor: Colors.IconColor[0],
+            tabBarInactiveTintColor: Colors.Default.Grey,
         })} >
             <Tab.Screen name="인보이스" component={InvoiceStack} options={{headerShown:false}} />
             <Tab.Screen name="마이페이지" component={MyPageStack} options={{headerShown:false}} />
