@@ -9,6 +9,7 @@ const Sizes = {
   },
 
   MyPage: {
+    welcomeFontSize: 28
   },
 
   BottomTab: {

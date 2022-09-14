@@ -375,13 +375,12 @@ const styles = StyleSheet.create({
   instruction: {
     textAlign: "center",
     fontSize: Sizes.Invoice.InstructionFontSize,
-    color: Colors.Default.Black,
+    color: "#2A321F",
     marginBottom: 10
   },
   logo: {
     width: 300,
     height: 50,
-    resizeMode: 'contain',
     margin: 30
   }
 })

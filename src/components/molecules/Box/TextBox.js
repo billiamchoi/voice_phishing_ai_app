@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import { Text, View, StyleSheet} from "react-native";
-import { v4 as uuidv4 } from 'uuid';
 import { Sizes, Colors } from "../../../styles";
 export default class TextBox extends Component {
   
@@ -20,12 +19,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: 330,
     height: 410,
-    backgroundColor: Colors.Default.White,
+    backgroundColor: "#D8E1E7",
     borderWidth: 1,
     padding: 10,
     borderColor: Colors.BorderColor,
   },
   resultText: {
-    fontSize: Sizes.Invoice.TextBoxFontSize
+    fontSize: Sizes.Invoice.TextBoxFontSize,
+    color: "#2A321F"
   }
 })
