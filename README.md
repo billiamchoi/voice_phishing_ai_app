@@ -53,7 +53,7 @@ Let Metro Bundler run in its own terminal. Open a new terminal inside your React
 $ npx react-native run-android
 ```
 
-#### Example
+## Example
 
 <img src="https://user-images.githubusercontent.com/48000438/190830121-ee587e58-0c2e-4483-950a-06998d27db7c.gif">
 
