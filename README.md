@@ -55,6 +55,6 @@ $ npx react-native run-android
 
 #### Example
 
-<img src="https://user-images.githubusercontent.com/48000438/190829479-374dea2a-e609-4fa7-a17c-945abfe4dbb9.gif">
+<img src="https://user-images.githubusercontent.com/48000438/190830121-ee587e58-0c2e-4483-950a-06998d27db7c.gif">
 
 
